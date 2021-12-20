@@ -13,9 +13,9 @@
 ## Main
 
       1. src目录基于IDA microcode实现了一大半的 “no more goto” 的算法；
-      1. 代码写的很烂，后续有时间继续优化；
-      1. 非sese region的处理部分暂未处理；
-      1. 对于条件变量的声明和处理部分我觉得还需思考（条件表达式的处理）
+      2. 代码写的很烂，后续有时间继续优化；
+      3. 非sese region的处理部分暂未处理；
+      4. 对于条件变量的声明和处理部分我觉得还需思考（条件表达式的处理）
 
 ## Example
 
@@ -56,20 +56,17 @@ void sub_11380()
 ## Discussion
 
 相比于Ghidra， IDA Control-flow Structing做的较差。 原因有以下2点：
-
 1. IDA 对try-except 以及 C++的SEH 不做处理，代码经常缺一块；
 2. IDA的noreturn函数识别效果极差
 
 noreturn函数识别存在以下2中错误 ：
-
 1. 本来是noreturn函数但是未识别出来
 2. 将不是noreturn的函数识别出了noreturn函数
 
 上述的2中出现的一种情况是：
-
-                1. 一个函数指针 fptr 被赋予了一个noreturn函数的地址 , 即 `fptr= (__noreturn) func_addr; `
-                2. 接下来所有的call fptr指令，IDA都会认为fptr指向的是 noreturn函数，即认为 `（__noreturn）fptr();`
-                3. 然而函数指针即使存在默认值，也可能在运行时被动态修改，因此这样的分析是错误的。
+1. 一个函数指针 fptr 被赋予了一个noreturn函数的地址 , 即 `fptr= (__noreturn) func_addr; `
+2. 接下来所有的call fptr指令，IDA都会认为fptr指向的是 noreturn函数，即认为 `（__noreturn）fptr();`
+3. 然而函数指针即使存在默认值，也可能在运行时被动态修改，因此这样的分析是错误的。
 
 Ghidra不存在以上的所有问题。
 
