@@ -1,0 +1,31 @@
+----------------------------
+1  : Sequences Reduction: 9<-10 
+2  : If-Then Reduction: 7<-8 
+3  : Sequences Reduction: 4<-5 
+4  : ACSESE Region Reduction: 1<-7 
+5  : Sequences Reduction: 0<-1 
+
+void sub_11380() 
+{
+	block0
+    if(!Block3 || !Block2)
+    {
+        block4
+        block5
+    }
+    if(!Block1)
+    {
+        block6
+    }
+    if(!Block3 || !Block1)
+    {
+        if(block7)
+        {
+            block8
+        }
+        
+    }
+    block9
+    block10
+}
+
