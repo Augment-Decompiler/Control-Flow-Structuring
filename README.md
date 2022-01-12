@@ -86,6 +86,12 @@ https://github.com/radareorg/ghidra-native/blob/e2244428369498af3e84d32713ce85b4
 
 这里我觉得IDA和Ghidra的实现不会差太多，对结构化控制流的实现主要基于patten match，而不是像no more goto一样基于大量的图理论。
 
+## No More Goto已有的开源实现
+
+我写完这部分代码之后发现了dewolf， dewolf的代码看上去比我写的好多了，看上去也有简单的类型推断及条件表达式的合并，是一份好的参考。 
+
+https://github.com/fkie-cad/dewolf
+
 ## Reference
 
 1. No More Gotos: Decompilation Using Pattern-Independent Control-Flow Structuring and Semantics-Preserving Transformations -- (ndss 2015)
