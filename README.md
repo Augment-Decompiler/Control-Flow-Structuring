@@ -92,6 +92,130 @@ https://github.com/radareorg/ghidra-native/blob/e2244428369498af3e84d32713ce85b4
 
 https://github.com/fkie-cad/dewolf
 
+## IDA MicroCode's document
+
+plugins\hexrays_sdk\plugins 目录下有20个 demo，有很多给出了microcode的使用示例（hexrays.hpp文件也很重要），有大佬写了分析：
+
+https://panda0s.top/2021/08/19/Microcode-%E6%8F%92%E4%BB%B6%E5%AD%A6%E4%B9%A0/#Microcode-%E6%8F%92%E4%BB%B6%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0
+
+## dewolf体验及于IDA的对比
+
+举个hping的例子，IDA的反编译结果如下：
+
+```c
+_BOOL8 __fastcall sub_B0A0(char *a1)
+{
+  const unsigned __int16 *v2; // rcx
+  __int64 v3; // rax
+  unsigned __int16 v4; // dx
+  char *v5; // rax
+  unsigned __int16 v6; // dx
+  __int64 v7; // rdx
+  int v8; // esi
+  _BOOL8 result; // rax
+  __int64 v10; // rdi
+  __int64 v11; // rdx
+
+  v2 = *__ctype_b_loc();
+  while ( 1 )
+  {
+    v3 = *a1;
+    v4 = v2[v3];
+    if ( (v4 & 0x2000) == 0 )
+      break;
+    ++a1;
+  }
+  if ( (_BYTE)v3 != '-' )
+  {
+    if ( (_BYTE)v3 )
+      goto LABEL_6;
+    return 0LL;
+  }
+  v11 = a1[1];
+  v5 = a1 + 1;
+  if ( !(_BYTE)v11 )
+    return 0LL;
+  v4 = v2[v11];
+  if ( (v4 & 0x2000) == 0 )
+  {
+    ++a1;
+LABEL_6:
+    if ( (v4 & 0x800) != 0 )
+    {
+      v5 = a1;
+      while ( 1 )
+      {
+        v7 = *++v5;
+        v8 = (_DWORD)v5 - (_DWORD)a1;
+        if ( !(_BYTE)v7 )
+          return v8 != 0;
+        v6 = v2[v7];
+        if ( (v6 & 0x2000) != 0 )
+          goto LABEL_13;
+        if ( (v6 & 0x800) == 0 )
+          return 0LL;
+      }
+    }
+    return 0LL;
+  }
+  v8 = 0;
+  do
+LABEL_13:
+    v10 = *++v5;
+  while ( (v2[v10] & 0x2000) != 0 );
+  result = 0LL;
+  if ( !(_BYTE)v10 )
+    return v8 != 0;
+  return result;
+}
+```
+
+上面反编译出来的代码使用了过多的goto， 导致整个控制流看起来及其混乱。而使用dewolf反编译的结果如下：
+
+```c
+long sub_b0a0(char * arg1) {
+    void * var_2;
+    char * var_0;
+    unsigned short ** var_1;
+    var_1 = __ctype_b_loc();
+    while (true) {
+        var_0 = arg1 + 1L;
+        if ((*(*var_1 + (*arg1 << 1)) & 0x1fe & ' ') == 0) {
+            break;
+        }
+        arg1 = var_0;
+    }
+    if (*arg1 == '-') {
+        var_2 = arg1 + 1L;
+    }
+    if ((*arg1 != '-') || (*var_2 == 0) || ((*(*var_1 + (*var_2 << 1)) & 0x1fe & ' ') == 0))     {
+        return 0L;
+    }
+    else {
+        arg1 = var_0;
+        while (true) {
+            var_0 = arg1 + 1L;
+            var_2 = arg1 + 1L;
+            if ((*(*var_1 + (*var_2 << 1) + 1L) & ' ') == 0) {
+                break;
+            }
+            arg1 = var_0;
+        }
+        if (*var_2 != 0) {
+            return 0L;
+        }
+        else {
+            return 0 != 0;
+        }
+    }
+}
+```
+
+dewolf对比IDA反编译功能的优缺点：
+
+* 优点： 不使用goto语句，使得函数的控制流变得简单易懂；
+* 缺点： 算法复杂度高了很多，至少是o(n**2)的级别， 导致反编译一个复杂函数的时间变得很长（对于很多更加复杂的函数，5分钟之内都无法反编译成功），且各种复杂情况的bug很多。对于反编译出来的伪代码优化太少，例如竟然不支持数组，且变量的选择很奇怪。最后，使用"no more goto" 算法之后，if或者while语句内的表达式往往变得又多又长，如何对这些条件表达式处理？--（IDA一直以来都不采用no more goto的算法看起来有一定道理）
+
 ## Reference
 
 1. No More Gotos: Decompilation Using Pattern-Independent Control-Flow Structuring and Semantics-Preserving Transformations -- (ndss 2015)
